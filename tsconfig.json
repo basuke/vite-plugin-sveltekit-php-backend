@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "isolatedModules": true,
+    "lib": ["esnext", "dom"],
+    "moduleResolution": "node",
+    "module": "esnext",
+    "target": "esnext",
+    "declaration": true,
+    "preserveValueImports": true,
+    "outDir": "dist/",
+    "ignoreDeprecations": "5.0"
+  },
+  "include": ["./src/**/*.js", "./src/**/*.ts"],
+  "exclude": ["./node_modules/**"]
+}

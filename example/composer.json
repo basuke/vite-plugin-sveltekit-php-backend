@@ -1,0 +1,17 @@
+{
+  "name": "basuke/php-backend",
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/php/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Basuke Suzuki",
+      "email": "basuke@mac.com"
+    }
+  ],
+  "require": {
+    "symfony/debug": "^4.4"
+  }
+}

@@ -24,23 +24,3 @@ function load(array $pageServerLoad) {
         'server' => $_SERVER,
     ];
 }
-
-// ===============================================
-// following code should be added by vite plugin
-// ===============================================
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-} elseif ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    echo json_encode([
-        'load' => [
-            'defined' => function_exists('load'),
-        ],
-        'action' => [
-            'defined' => function_exists('action'),
-        ],
-    ]);
-} else {
-    $pageServerLoad = json_decode($_SERVER['SVELTEKIT_PAGESERVERLOAD'] ?? '{"params":{},"url":"","route":{"id":""}}', true);
-    echo json_encode(load($pageServerLoad));
-}

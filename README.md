@@ -14,12 +14,12 @@ function load(array $pageServerLoad) {
 
 ```
 
-Not like the one which uses SvelteKit as an assets manager.
-This plugin allows you to use SvelteKit the frontend of PHP backend.
-No need to have a router in PHP.
-No need to have Nginx as a front end of PHP-fpm.
-Plugin does the communication directly to PHP-fpm.
-Of course, it's Composer compatible so that you can use any composer packages inlcuding your own application logic.
+- Not like the one which uses SvelteKit as an assets manager.
+- This plugin allows you to use SvelteKit the frontend of PHP backend.
+- No need to have a router in PHP.
+- No need to have Nginx as a front end of PHP-fpm.
+- Plugin does the communication directly to PHP-fpm.
+- Of course, it's Composer compatible so that you can use any composer packages inlcuding your own application logic.
 
 ## No nginx required any more
 

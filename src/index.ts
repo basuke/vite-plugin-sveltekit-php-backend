@@ -33,7 +33,7 @@ export async function plugin(
 ): Promise<Plugin[]> {
   const host = options.host ?? "localhost";
   const port = options.port ?? 9000;
-  const debug = options.debug ?? true;
+  const debug = options.debug ?? false;
   let root;
   let building = false;
   let phpDir;
@@ -89,6 +89,7 @@ export async function plugin(
 
 const sharedClientJS = ({ host, port, debug, root }): string => `
   import { createClient } from "fastcgi-kit";
+  import Cookie from "cookie";
 
   export const client = createClient({
     host: ${Q(host)},
@@ -99,18 +100,33 @@ const sharedClientJS = ({ host, port, debug, root }): string => `
     },
   });
 
-  export const invokePhpLoad = (path, params, route, url) => {
+  export const invokePhpLoad = (path, {params, route, url, cookies}) => {
     const backendUrl = 'http://localhost/' + path;
+
+    const fcgiParams = {
+      SVELTEKIT_PAGESERVEREVENT: JSON.stringify({
+        params,
+        route,
+        url: url.toString(),
+      }),
+    };
+
+    // add cookie params if cookie exists.
+    const allCookies = cookies.getAll();
+    if (allCookies.length) {
+      fcgiParams['HTTP_COOKIE'] = allCookies.map(({name, value}) => Cookie.serialize(name, value)).join('; ');
+    }
 
     return new Promise(async (resolve, reject) => {
       try {
-        const response = await client.get(backendUrl, {
-          SVELTEKIT_PAGESERVERLOAD: JSON.stringify({
-            params,
-            route,
-            url: url.toString(),
-          }),
-        });
+        const response = await client.get(backendUrl, fcgiParams);
+        const setCookieHeader = response.headers['set-cookie'];
+        if (setCookieHeader) {
+          const setCookies = Cookie.parse(setCookieHeader);
+          for (const name in setCookies) {
+            cookies.set(name, setCookies[name]);
+          }
+        }
         resolve(response.json());
       } catch (e) {
         reject(e);
@@ -122,8 +138,8 @@ const sharedClientJS = ({ host, port, debug, root }): string => `
 const invokePhpLoadJS = (phpPath: string) => `
   import { invokePhpLoad } from "${sharedClientVirtualModule}";
 
-  export const load = (async ({ params, route, url }) => {
-    return await invokePhpLoad(${Q(phpPath)}, params, route, url);
+  export const load = (async (event) => {
+    return await invokePhpLoad(${Q(phpPath)}, event);
   });
 `;
 
@@ -144,8 +160,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ],
     ]);
 } else {
-    $pageServerLoad = json_decode($_SERVER['SVELTEKIT_PAGESERVERLOAD'] ?? '{"params":{},"url":"","route":{"id":""}}', true);
-    echo json_encode(load($pageServerLoad));
+    $event = json_decode($_SERVER['SVELTEKIT_PAGESERVEREVENT'] ?? '{"params":{},"url":"","route":{"id":""}}', true);
+    header('Content-Type: application/json');
+    echo json_encode(load($event));
 }
 `;
 

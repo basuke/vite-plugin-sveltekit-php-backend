@@ -1,6 +1,6 @@
 <h1>Fruite</h1>
 
-<div>
+<div data-sveltekit-preload-data="tap">
     <a href="/php/apple">Apple</a> | 
     <a href="/php/orange">Orange</a> | 
     <a href="/php/kiwi">Kiwi</a>

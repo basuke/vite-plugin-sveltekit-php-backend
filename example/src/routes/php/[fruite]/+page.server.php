@@ -2,8 +2,8 @@
 
 require $_SERVER['DOCUMENT_ROOT'] . "/vendor/autoload.php";
 
-function load(array $pageServerLoad) {
-    $fruite = $pageServerLoad['params']['fruite'] ?? 'unknown';
+function load(array $event) {
+    $fruite = $event['params']['fruite'] ?? 'unknown';
 
     switch ($fruite) {
         case 'apple':
@@ -17,8 +17,12 @@ function load(array $pageServerLoad) {
             break;
     }
 
+    $lastChoise = $_COOKIE['fruite'];
+    setcookie('fruite', $fruite);
+
     return [
         'name' => Ucfirst($fruite),
+        'previous' => ucfirst($lastChoise),
         'emoji' => $emoji,
         'encoded' => serialize($fruite . $emoji),
         'server' => $_SERVER,

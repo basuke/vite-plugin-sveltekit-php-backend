@@ -34,6 +34,12 @@ export async function plugin(
       if (id === sharedClientVirtualModule) {
         return sharedClientResolvedModuleId;
       }
+
+      if (id.endsWith(".php")) {
+        if (id !== "+server.php" && !id.endsWith(".server.php")) {
+          throw new Error("PHP cannot run on client side.");
+        }
+      }
     },
 
     load(id) {
@@ -50,7 +56,7 @@ export async function plugin(
             },
           });
 
-          export const get = (params, route, url, file) => {
+          export const invokePhpLoad = (params, route, url, file) => {
             const backendUrl = 'http://localhost/src/routes' + route.id + '/' + file;
   
             return new Promise(async (resolve, reject) => {
@@ -76,10 +82,10 @@ export async function plugin(
     transform(code, id) {
       if (id.endsWith(".php")) {
         code = `
-          import { get } from "${sharedClientVirtualModule}";
+          import { invokePhpLoad } from "${sharedClientVirtualModule}";
 
           export const load = (async ({ params, route, url }) => {
-            return await get(params, route, url, '+page.server.php');
+            return await invokePhpLoad(params, route, url, '+page.server.php');
           });
         `;
 

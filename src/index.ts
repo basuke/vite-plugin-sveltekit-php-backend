@@ -79,7 +79,11 @@ export async function plugin(
         const phpPath = path.join(phpDir, flattenId(id));
         fs.writeFileSync(phpPath, code + phpHandler());
 
-        return { code: invokePhpLoadJS(path.relative(root, phpPath)) };
+        const relativePath = path.relative(root, phpPath);
+        code =
+          invokePhpLoadJS(relativePath) +
+          definePhpActionsJS(relativePath, ["update", "enter", "restart"]);
+        return { code };
       }
     },
     buildEnd() {},
@@ -100,9 +104,7 @@ const sharedClientJS = ({ host, port, debug, root }): string => `
     },
   });
 
-  export const invokePhpLoad = (path, {params, route, url, cookies}) => {
-    const backendUrl = 'http://localhost/' + path;
-
+  function createFCGIParams({params, route, url, cookies, request}) {
     const fcgiParams = {
       SVELTEKIT_PAGESERVEREVENT: JSON.stringify({
         params,
@@ -110,29 +112,46 @@ const sharedClientJS = ({ host, port, debug, root }): string => `
         url: url.toString(),
       }),
     };
-
+  
     // add cookie params if cookie exists.
     const allCookies = cookies.getAll();
     if (allCookies.length) {
       fcgiParams['HTTP_COOKIE'] = allCookies.map(({name, value}) => Cookie.serialize(name, value)).join('; ');
     }
 
+    return fcgiParams;
+  }
+
+  function forwardCookies(response, { cookies }) {
+    const setCookieHeader = response.headers['set-cookie'];
+    if (setCookieHeader) {
+      const setCookies = Cookie.parse(setCookieHeader);
+      for (const name in setCookies) {
+        cookies.set(name, setCookies[name]);
+      }
+    }
+  }
+
+  export const invokePhpLoad = async (path, event) => {
     return new Promise(async (resolve, reject) => {
+      const backendUrl = 'http://localhost/' + path;
+      const fcgiParams = createFCGIParams(event);
+  
       try {
         const response = await client.get(backendUrl, fcgiParams);
-        const setCookieHeader = response.headers['set-cookie'];
-        if (setCookieHeader) {
-          const setCookies = Cookie.parse(setCookieHeader);
-          for (const name in setCookies) {
-            cookies.set(name, setCookies[name]);
-          }
-        }
+        forwardCookies(response, event);
         resolve(response.json());
       } catch (e) {
         reject(e);
       }
     });
   };
+
+  export async function invokePhpActions(path, action, {params, route, url, cookies, request}) {
+    const data = await request.formData();
+    const formData = JSON.stringify(Array.from(data));
+    console.log({formData});
+  }
 `;
 
 const invokePhpLoadJS = (phpPath: string) => `
@@ -141,6 +160,18 @@ const invokePhpLoadJS = (phpPath: string) => `
   export const load = (async (event) => {
     return await invokePhpLoad(${Q(phpPath)}, event);
   });
+`;
+
+const definePhpActionsJS = (phpPath: string, actions: string[]) =>
+  `
+  import { invokePhpActions } from "${sharedClientVirtualModule}";
+
+  export const actions = {` +
+  // prettier-ignore
+  actions.map((action) => `
+    ${Q(action)}: async (event) => invokePhpActions(${Q(phpPath)}, ${Q(action)}, event)`).join(",") +
+  `
+  };
 `;
 
 const phpHandler = () => `

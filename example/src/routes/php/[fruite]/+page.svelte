@@ -20,7 +20,7 @@ export let data;
 <hr>
 
 <h3>PHP seriarized name is </h3>
-<p class=info>Result of <code>`serialize($fruite . $emoji)`</code>.</p>
+<p class=info>Result of <code>`serialize($fruite)`</code>.</p>
 <pre>{data.encoded}</pre>
 
 <hr>

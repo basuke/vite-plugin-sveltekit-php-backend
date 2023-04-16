@@ -12,6 +12,8 @@
     }
   ],
   "require": {
-    "symfony/debug": "^4.4"
+    "symfony/debug": "^4.4",
+    "alrik11es/cowsayphp": "^1.2",
+    "mdwheele/fortune": "dev-master"
   }
 }

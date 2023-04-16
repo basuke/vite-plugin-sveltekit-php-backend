@@ -18,11 +18,13 @@ function load(array $event) {
 
 You can also use PHP to write `form actions` or `endpoint`.
 
+Because SvelteKit talks Web standards, communication between SvelteKit and backend PHP server is pretty straight forward using HTTP semantics.
+
 - This plugin allows you to use SvelteKit the frontend of PHP backend.
 - Not like the one which uses SvelteKit as an assets manager.
 - No need to have a router in PHP side. SvelteKit is the router.
 - No need to have Nginx as a front end of PHP-fpm. Plugin communicate directly with PHP-fpm.
-- Of course, it's Composer compatible so that you can use any composer PHP packages inlcuding your own application logic.
+- Of course, it's Composer compatible so that you can use any composer PHP packages including your own application logic.
 - It is obvious but you cannot create `+page.php` because there's no PHP runtime in client environment.
 
 ## How to run demo
@@ -41,17 +43,21 @@ You can also use PHP to write `form actions` or `endpoint`.
 
 Try pages and take a look into the code in `src/routes`
 
-### routes/php/[fruite]
+### src/routes/php/[fruite]
 
 > Example of page server load. The route parameters are passed to `+page.server.php`. Also it returns `$_SERVER` php variables for reference.
 
-### routes/php/emoji/[fruite]
+### src/routes/php/emoji/[fruite]
 
 > Example of endpoing.
 
-### routes/pherdle
+### src/routes/pherdle
 
 > Example of form actions. Ported Sverdle to PHP.
+
+### src/php
+
+> PHP library bound to `App\` namespace. You can place application logic in this folder. See `composer.json` for the configuration.
 
 ## Motivation of This Project
 
@@ -71,7 +77,7 @@ With this plugin, you can connect your business logics written in PHP directly t
 
 Usually your PHP application is served via PHP-fpm. Because PHP-fpm doesn't talk HTTP by itself, you usually place nginx in front of PHP-fpm. This plugin uses `fastcgi-kit` npm package (which is written by me for this project :p ) to communicate directly with PHP-fpm.
 
-On development phase, there's no need to launch PHP dev server any more. Just launch PHP-fpm service and any script will run from SvelteKit route. (Well, of course with under the ristriction of PHP-fpm security).
+On development phase, there's no need to launch PHP dev server any more. Just launch PHP-fpm service and any script will run from SvelteKit route. (Well, of course with under the restriction of PHP-fpm security).
 
 On production, you can replace `nginx` with node application (might be Express.js) to run SvelteKit application and every PHP call will be handled via FastCGI directly from the SvelteKit's page logic.
 
@@ -79,12 +85,12 @@ On production, you can replace `nginx` with node application (might be Express.j
 
 ## Frontend is easier to replace than backend
 
-Suppose your codebase has been running for decades. Your app uses PHP for a historical reason. You are very passopnated to make the application modernized. What can you do?
+Suppose your codebase has been running for decades. Your app uses PHP for a historical reason. You are very passionate to make the application modernized. What can you do?
 
 Simple application is easy. You can rewrite the app from the scratch. But decent size of application includes many business logics in the code.
 
 Frontend trends such as user interface changes quickly but your businness logic isn't. At lease those changes should be unrelated to the frontend trends.
 
-## Lisence
+## License
 
 MIT

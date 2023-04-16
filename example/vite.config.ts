@@ -1,7 +1,7 @@
 import { sveltekit } from "@sveltejs/kit/vite";
-import { plugin } from "../src";
+import phpBackend from "../src";
 import { defineConfig } from "vite";
 
 export default defineConfig({
-  plugins: [sveltekit(), plugin()],
+  plugins: [sveltekit(), phpBackend({ address: "localhost:9000" })],
 });

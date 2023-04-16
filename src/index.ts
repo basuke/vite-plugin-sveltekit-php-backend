@@ -8,8 +8,7 @@ const sharedClientVirtualModule = `virtual:${name}/shared-client`;
 const sharedClientResolvedModuleId = "\0" + sharedClientVirtualModule;
 
 interface PHPBackendOptions {
-  host?: string;
-  port?: number;
+  address?: string;
   debug?: boolean;
 }
 
@@ -31,8 +30,7 @@ function Q(s: string): string {
 export async function plugin(
   options: PHPBackendOptions = {}
 ): Promise<Plugin[]> {
-  const host = options.host ?? "localhost";
-  const port = options.port ?? 9000;
+  const address = options.address ?? "localhost:9000";
   const debug = options.debug ?? false;
   let root;
   let building = false;
@@ -68,7 +66,7 @@ export async function plugin(
 
     load(id) {
       if (id === sharedClientResolvedModuleId) {
-        return sharedClientJS({ host, port, debug, root });
+        return sharedClientJS({ address, debug, root });
       }
     },
 
@@ -91,14 +89,13 @@ export async function plugin(
   return [plugin];
 }
 
-const sharedClientJS = ({ host, port, debug, root }): string => `
+const sharedClientJS = ({ address, debug, root }): string => `
   import { createClient } from "fastcgi-kit";
   import { fail } from '@sveltejs/kit';
   import Cookie from "cookie";
 
   export const client = createClient({
-    host: ${Q(host)},
-    port: ${Q(port)},
+    address: ${Q(address)},
     debug: ${Q(debug)},
     params: {
       DOCUMENT_ROOT: ${Q(root)},

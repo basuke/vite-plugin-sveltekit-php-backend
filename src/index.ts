@@ -93,6 +93,7 @@ export async function plugin(
 
 const sharedClientJS = ({ host, port, debug, root }): string => `
   import { createClient } from "fastcgi-kit";
+  import { fail } from '@sveltejs/kit';
   import Cookie from "cookie";
 
   export const client = createClient({
@@ -125,9 +126,15 @@ const sharedClientJS = ({ host, port, debug, root }): string => `
   function forwardCookies(response, { cookies }) {
     const setCookieHeader = response.headers['set-cookie'];
     if (setCookieHeader) {
-      const setCookies = Cookie.parse(setCookieHeader);
-      for (const name in setCookies) {
-        cookies.set(name, setCookies[name]);
+      const parsed = Cookie.parse(setCookieHeader);
+      for (const name in parsed) {
+        const value = parsed[name];
+        if (value === 'deleted') {
+          cookies.delete(name);
+        } else {
+          cookies.set(name, value);
+        }
+        break;
       }
     }
   }
@@ -147,10 +154,26 @@ const sharedClientJS = ({ host, port, debug, root }): string => `
     });
   };
 
-  export async function invokePhpActions(path, action, {params, route, url, cookies, request}) {
-    const data = await request.formData();
-    const formData = JSON.stringify(Array.from(data));
-    console.log({formData});
+  export async function invokePhpActions(path, action, event) {
+    const request = event.request;
+    const body = (new URLSearchParams(await request.formData())).toString();
+
+    return new Promise(async (resolve, reject) => {
+      const backendUrl = 'http://localhost/' + path;
+      const fcgiParams = createFCGIParams(event);
+      fcgiParams['SVELTEKIT_ACTION'] = action;
+  
+      try {
+        const response = await client.post(backendUrl, body, fcgiParams);
+        if (response.statusCode >= 400) {
+          resolve(fail(response.statusCode, response.json()));
+        }
+        forwardCookies(response, event);
+        resolve();
+      } catch (e) {
+        reject(e);
+      }
+    });
   }
 `;
 
@@ -179,7 +202,45 @@ const phpHandler = () => `
 // following code should be added by vite plugin
 // ===============================================
 
+function fail(int $status_code, $body = []) {
+  header("HTTP/1.1 {$status_code} Failure");
+  header("Content-type: application/json");
+  echo json_encode($body);
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  class SvelteKitPost implements ArrayAccess {
+    private array $values = [];
+    public function __construct() {
+      $input = file_get_contents('php://input');
+      $input = str_replace('=', '[]=', $input);
+      parse_str($input, $this->values);
+    }
+
+    public function getAll($name) {
+      return $this->values[$name] ?? null;
+    }
+
+    public function get($name) {
+      $values = $this->getAll($name);
+      return $values && count($values) > 0 ? $values[0] : null;
+    }
+    public function offsetExists(mixed $offset): bool { return $this->getAll($offset); }
+    public function offsetGet(mixed $offset): mixed { return $this->get($offset); }
+    public function offsetSet(mixed $offset, mixed $value): void {}
+    public function offsetUnset(mixed $offset): void {}
+  };
+
+  $_POST = new SvelteKitPost();
+
+  $event = json_decode($_SERVER['SVELTEKIT_PAGESERVEREVENT'] ?? '{"params":{},"url":"","route":{"id":""}}', true);
+  $action = $_SERVER['SVELTEKIT_ACTION'] ?? 'default';
+
+  if (isset($actions[$action]) && is_callable($actions[$action])) {
+    call_user_func($actions[$action], $event);
+  } else {
+    echo "Action '{$action}' is not defiened";
+  }
 
 } elseif ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     echo json_encode([

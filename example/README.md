@@ -1,38 +1,27 @@
-# create-svelte
+## How to run demo
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+### Prerequirements:
 
-## Creating a project
+- PHP with PHP fpm running
+- composer for PHP packages
+- Node.js
 
-If you're seeing this, you've probably already done this step. Congrats!
+### Steps
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+1. cd to `example/`
+2. `yarn` to install required packages.
+3. `yarn dev --open` to launch dev server.
 
-# create a new project in my-app
-npm create svelte@latest my-app
-```
+Try pages and take a look into the code in `src/routes`
 
-## Developing
+### routes/php/[fruite]
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+> Example of page server load. The route parameters are passed to `+page.server.php`. Also it returns `$_SERVER` php variables for reference.
 
-```bash
-npm run dev
+### routes/php/emoji/[fruite]
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+> Example of endpoing.
 
-## Building
+### routes/pherdle
 
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+> Example of form actions. Ported Sverdle to PHP.

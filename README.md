@@ -23,6 +23,34 @@ You can also use PHP to write `form actions` or `endpoint`.
 - Of course, it's Composer compatible so that you can use any composer PHP packages inlcuding your own application logic.
 - It is obvious but you cannot create `+page.php` because there's no PHP runtime in client environment.
 
+## How to run demo
+
+### Prerequirements:
+
+- PHP with PHP fpm running
+- composer for PHP packages
+- Node.js
+
+### Steps
+
+1. cd to `example/`
+2. `yarn` to install required packages.
+3. `yarn dev --open` to launch dev server.
+
+Try pages and take a look into the code in `src/routes`
+
+### routes/php/[fruite]
+
+> Example of page server load. The route parameters are passed to `+page.server.php`. Also it returns `$_SERVER` php variables for reference.
+
+### routes/php/emoji/[fruite]
+
+> Example of endpoing.
+
+### routes/pherdle
+
+> Example of form actions. Ported Sverdle to PHP.
+
 ## Motivation of This Project
 
 You might ask, "Who uses PHP in 2023?"
@@ -54,3 +82,7 @@ Suppose your codebase has been running for decades. Your app uses PHP for a hist
 Simple application is easy. You can rewrite the app from the scratch. But decent size of application includes many business logics in the code.
 
 Frontend trends such as user interface changes quickly but your businness logic isn't. At lease those changes should be unrelated to the frontend trends.
+
+## Lisence
+
+MIT

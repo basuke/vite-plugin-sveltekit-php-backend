@@ -78,9 +78,13 @@ export async function plugin(
         fs.writeFileSync(phpPath, code + phpHandler());
 
         const relativePath = path.relative(root, phpPath);
-        code =
-          invokePhpLoadJS(relativePath) +
-          definePhpActionsJS(relativePath, ["update", "enter", "restart"]);
+        if (id.endsWith("+server.php")) {
+          code = invokePhpEndpointJS(relativePath, "GET");
+        } else {
+          code =
+            invokePhpLoadJS(relativePath) +
+            definePhpActionsJS(relativePath, ["update", "enter", "restart"]);
+        }
         return { code };
       }
     },
@@ -151,6 +155,28 @@ const sharedClientJS = ({ address, debug, root }): string => `
     });
   };
 
+  export const invokePhpEndpoint = async (path, method, event) => {
+    return new Promise(async (resolve, reject) => {
+      const backendUrl = 'http://localhost/' + path;
+      const fcgiParams = createFCGIParams(event);
+      fcgiParams['REQUEST_METHOD'] = method;
+      fcgiParams['SVELTEKIT_METHOD'] = method;
+
+      try {
+        const response = await client.get(backendUrl, fcgiParams);
+        forwardCookies(response, event);
+
+        const res = new Response(response.body, {
+          status: response.statusCode,
+          headers: response.headers,
+        });
+        resolve(res);
+      } catch (e) {
+        reject(e);
+      }
+    });
+  }
+
   export async function invokePhpActions(path, action, event) {
     const request = event.request;
     const body = (new URLSearchParams(await request.formData())).toString();
@@ -182,6 +208,14 @@ const invokePhpLoadJS = (phpPath: string) => `
   });
 `;
 
+const invokePhpEndpointJS = (phpPath: string, method: string) => `
+  import { invokePhpEndpoint } from "${sharedClientVirtualModule}";
+
+  export async function ${method}(event) {
+    return await invokePhpEndpoint(${Q(phpPath)}, ${Q(method)}, event);
+  }
+`;
+//
 const definePhpActionsJS = (phpPath: string, actions: string[]) =>
   `
   import { invokePhpActions } from "${sharedClientVirtualModule}";
@@ -250,8 +284,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ]);
 } else {
     $event = json_decode($_SERVER['SVELTEKIT_PAGESERVEREVENT'] ?? '{"params":{},"url":"","route":{"id":""}}', true);
+    $method = $_SERVER['SVELTEKIT_METHOD'] ?? 'load';
     header('Content-Type: application/json');
-    echo json_encode(load($event));
+    $result = call_user_func($method, $event);
+    echo json_encode($result);
 }
 `;
 

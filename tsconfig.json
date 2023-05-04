@@ -8,7 +8,8 @@
     "declaration": true,
     "preserveValueImports": true,
     "outDir": "dist/",
-    "ignoreDeprecations": "5.0"
+    "ignoreDeprecations": "5.0",
+    "allowSyntheticDefaultImports": true
   },
   "include": ["./src/**/*.js", "./src/**/*.ts"],
   "exclude": ["./node_modules/**"]

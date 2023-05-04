@@ -15,6 +15,7 @@
     "fastcgi-kit": "^0.1.0"
   },
   "devDependencies": {
+    "@types/node": "^18.16.3",
     "typescript": "^5.0.3",
     "vite": "^4.2.1"
   }

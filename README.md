@@ -1,7 +1,7 @@
 # PHP Backend for SvelteKit
 
 <p align="center">
-<img alt="Svelte + PHP" src="./.github/images/svelte+php.gif" width="512">
+<img alt="Svelte + PHP" src="./.github/images/svelte+php.png" width="512">
 </p>
 
 You can have PHP logic directly in SvelteKit route directory like this: `+page.server.php`

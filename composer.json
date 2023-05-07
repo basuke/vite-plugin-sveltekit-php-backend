@@ -1,21 +1,21 @@
 {
-  "name": "basuke/sveltekit-php-backend",
-  "description": "SvelteKit PHP Backend",
-  "type": "library",
-  "license": "MIT",
-  "autoload": {
-    "psr-4": {
-      "Basuke\\SvelteKit\\": "src/php/"
+    "name": "basuke/sveltekit-php-backend",
+    "description": "SvelteKit PHP Backend",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Basuke\\SvelteKit\\": "src/php/"
+        },
+        "files": [
+            "src/php/functions.php"
+        ]
     },
-    "files": [
-      "src/php/functions.php"
-    ]
-  },
-  "authors": [
-    {
-      "name": "Basuke Suzuki",
-      "email": "basuke@mac.com"
-    }
-  ],
-  "require": {}
+    "authors": [
+        {
+            "name": "Basuke Suzuki",
+            "email": "basuke@mac.com"
+        }
+    ],
+    "require": {}
 }

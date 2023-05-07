@@ -76,20 +76,22 @@ export async function plugin(
         id = path.relative(root, id);
 
         const phpPath = path.join(phpDir, flattenId(id));
-        fs.writeFileSync(phpPath, code + phpBackendMain);
-
-        // const client = createClient({
-        //   address,
-        //   debug,
-        //   params: {
-        //     DOCUMENT_ROOT: root,
-        //   },
-        // });
-
-        // const response = await client.get(backendUrl, fcgiParams);
-        // console.log(response.json());
+        fs.writeFileSync(phpPath, phpBackendMain + code);
 
         const relativePath = path.relative(root, phpPath);
+
+        const client = createClient({
+          address,
+          debug,
+          params: {
+            DOCUMENT_ROOT: root,
+          },
+        });
+
+        const backendUrl = "http://localhost/" + relativePath;
+        const response = await client.options(backendUrl, {});
+        console.log(response.json());
+
         if (id.endsWith("+server.php")) {
           code = invokePhpEndpointJS(relativePath, "GET");
         } else {
@@ -244,8 +246,12 @@ const definePhpActionsJS = (phpPath: string, actions: string[]) =>
   };
 `;
 
-const phpBackendMain = `
-\\Basuke\\SvelteKit\\Backend::main(__NAMESPACE__);
-`;
+const phpBackendMain = `<?php
+require $_SERVER['DOCUMENT_ROOT'] . "/vendor/autoload.php";
+
+use \\Basuke\\SvelteKit\\Backend;
+
+register_shutdown_function([Backend::class, 'main'], __NAMESPACE__);
+?>`;
 
 export default plugin;

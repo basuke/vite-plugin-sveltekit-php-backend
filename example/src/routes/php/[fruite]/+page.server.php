@@ -1,7 +1,5 @@
 <?php
 
-require $_SERVER['DOCUMENT_ROOT'] . "/vendor/autoload.php";
-
 use \Basuke\SvelteKit\PageServerEvent;
 
 function load(PageServerEvent $event) {

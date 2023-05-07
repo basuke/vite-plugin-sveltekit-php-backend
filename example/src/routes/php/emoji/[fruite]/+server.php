@@ -1,7 +1,5 @@
 <?php
 
-require $_SERVER['DOCUMENT_ROOT'] . "/vendor/autoload.php";
-
 use Basuke\SvelteKit\PageServerEvent;
 use function Basuke\SvelteKit\json;
 

@@ -1,7 +1,5 @@
 <?php
 
-require $_SERVER['DOCUMENT_ROOT'] . "/vendor/autoload.php";
-
 use Cowsayphp\Farm;
 use Wheeler\Fortune\Fortune;
 

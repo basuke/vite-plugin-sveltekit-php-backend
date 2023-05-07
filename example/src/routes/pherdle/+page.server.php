@@ -2,9 +2,8 @@
 
 require $_SERVER['DOCUMENT_ROOT'] . "/vendor/autoload.php";
 
-// import { fail } from '@sveltejs/kit';
-// import { Game } from './game';
 use App\Game;
+use function Basuke\SvelteKit\Utils\fail;
 
 function load() {
 	$game = new Game($_COOKIE['sverdle'] ?? null);
@@ -36,7 +35,7 @@ $actions = [
 	'update' => function ($event) {
 		$game = new Game($_COOKIE['sverdle']);
 
-		$key = $_POST['key'];
+		$key = $event->post['key'];
 
 		$i = count($game->answers);
 
@@ -58,8 +57,7 @@ $actions = [
 	'enter' => function ($event) {
 		$game = new Game($_COOKIE['sverdle']);
 
-		/** @var object $_POST */
-		$guess = $_POST->getAll('guess');
+		$guess = $event->post->getAll('guess');
 
 		if (!$game->enter($guess)) {
 			return fail(400, ['badGuess' => true ]);

@@ -1,7 +1,7 @@
 <?php
 
 function GET($event) {
-    $fruite = $event['params']['fruite'];
+    $fruite = $event->params['fruite'];
 
     switch ($fruite) {
         case 'apple':

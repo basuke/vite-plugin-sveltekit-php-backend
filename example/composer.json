@@ -11,8 +11,14 @@
       "email": "basuke@mac.com"
     }
   ],
+  "repositories": [
+    {
+      "type": "path",
+      "url": ".."
+    }
+  ],
   "require": {
-    "symfony/debug": "^4.4",
+    "basuke/sveltekit-php-backend": "dev-main",
     "alrik11es/cowsayphp": "^1.2",
     "mdwheele/fortune": "dev-master"
   }

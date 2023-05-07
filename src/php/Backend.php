@@ -2,6 +2,8 @@
 
 namespace Basuke\SvelteKit;
 
+use function Uitls\fail;
+
 class Backend {
     public static function main(string $namespace = '\\') {
         $backend = new Backend($namespace);
@@ -28,7 +30,7 @@ class Backend {
                 $this->options();
                 break;
             default:
-                $this::fail(405, ['message' => 'Method Not Allowed']);
+                fail(405, ['message' => 'Method Not Allowed']);
         };
     }
 
@@ -41,7 +43,7 @@ class Backend {
             self::contentTypeIsJson();
             echo json_encode($result);
         } else {
-            self::fail(500, ['error' => "Function '{$method}' is not defiened"]);
+            fail(500, ['error' => "Function '{$method}' is not defiened"]);
         }
     }
 
@@ -53,10 +55,10 @@ class Backend {
                 $event = PageServerEvent::get();
                 call_user_func($actions[$action], $event);
             } else {
-                self::fail(500, ['error' => "Action '{$action}' is defiened but not callable"]);
+                fail(500, ['error' => "Action '{$action}' is defiened but not callable"]);
             }
         } else {
-            self::fail(500, ['error' => "Action '{$action}' is not defiened"]);
+            fail(500, ['error' => "Action '{$action}' is not defiened"]);
         }
     }
 
@@ -68,12 +70,5 @@ class Backend {
 
     public static function contentTypeIsJson() {
         header("Content-type: application/json");
-    }
-
-    public static function fail(int $status_code, $body = []) {
-        header("HTTP/1.1 {$status_code} Failure");
-        self::contentTypeIsJson();
-
-        echo json_encode($body);
     }
 }

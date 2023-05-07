@@ -23,10 +23,12 @@ class Environment {
 
         global $actions;
         $this->actions = [];
-        foreach ($actions as $action => $callable) {
-            $def = self::functionInfo($callable);
-            if ($def) {
-                $this->actions[$action] = $def;
+        if (is_array($actions)) {
+            foreach ($actions as $action => $callable) {
+                $def = self::functionInfo($callable);
+                if ($def) {
+                    $this->actions[$action] = $def;
+                }
             }
         }
     }

@@ -2,6 +2,7 @@ import type { Plugin } from "vite";
 
 import path from "node:path";
 import fs from "node:fs";
+import { createClient } from "fastcgi-kit";
 
 const name = "vite-plugin-sveltekit-php-backend";
 const sharedClientVirtualModule = `virtual:${name}/shared-client`;
@@ -70,12 +71,23 @@ export async function plugin(
       }
     },
 
-    transform(code, id) {
+    async transform(code, id) {
       if (id.endsWith(".php")) {
         id = path.relative(root, id);
 
         const phpPath = path.join(phpDir, flattenId(id));
-        fs.writeFileSync(phpPath, code + phpHandler());
+        fs.writeFileSync(phpPath, code + phpBackendMain);
+
+        // const client = createClient({
+        //   address,
+        //   debug,
+        //   params: {
+        //     DOCUMENT_ROOT: root,
+        //   },
+        // });
+
+        // const response = await client.get(backendUrl, fcgiParams);
+        // console.log(response.json());
 
         const relativePath = path.relative(root, phpPath);
         if (id.endsWith("+server.php")) {
@@ -92,6 +104,8 @@ export async function plugin(
   };
   return [plugin];
 }
+
+interface PHPStructure {}
 
 const sharedClientJS = ({ address, debug, root }): string => `
   import { createClient } from "fastcgi-kit";
@@ -148,6 +162,7 @@ const sharedClientJS = ({ address, debug, root }): string => `
       try {
         const response = await client.get(backendUrl, fcgiParams);
         forwardCookies(response, event);
+        console.log(response);
         resolve(response.json());
       } catch (e) {
         reject(e);
@@ -228,67 +243,8 @@ const definePhpActionsJS = (phpPath: string, actions: string[]) =>
   };
 `;
 
-const phpHandler = () => `
-// ===============================================
-// following code should be added by vite plugin
-// ===============================================
-
-function fail(int $status_code, $body = []) {
-  header("HTTP/1.1 {$status_code} Failure");
-  header("Content-type: application/json");
-  echo json_encode($body);
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  class SvelteKitPost implements ArrayAccess {
-    private array $values = [];
-    public function __construct() {
-      $input = file_get_contents('php://input');
-      $input = str_replace('=', '[]=', $input);
-      parse_str($input, $this->values);
-    }
-
-    public function getAll($name) {
-      return $this->values[$name] ?? null;
-    }
-
-    public function get($name) {
-      $values = $this->getAll($name);
-      return $values && count($values) > 0 ? $values[0] : null;
-    }
-    public function offsetExists(mixed $offset): bool { return $this->getAll($offset); }
-    public function offsetGet(mixed $offset): mixed { return $this->get($offset); }
-    public function offsetSet(mixed $offset, mixed $value): void {}
-    public function offsetUnset(mixed $offset): void {}
-  };
-
-  $_POST = new SvelteKitPost();
-
-  $event = json_decode($_SERVER['SVELTEKIT_PAGESERVEREVENT'] ?? '{"params":{},"url":"","route":{"id":""}}', true);
-  $action = $_SERVER['SVELTEKIT_ACTION'] ?? 'default';
-
-  if (isset($actions[$action]) && is_callable($actions[$action])) {
-    call_user_func($actions[$action], $event);
-  } else {
-    echo "Action '{$action}' is not defiened";
-  }
-
-} elseif ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    echo json_encode([
-        'load' => [
-            'defined' => function_exists('load'),
-        ],
-        'action' => [
-            'defined' => function_exists('action'),
-        ],
-    ]);
-} else {
-    $event = json_decode($_SERVER['SVELTEKIT_PAGESERVEREVENT'] ?? '{"params":{},"url":"","route":{"id":""}}', true);
-    $method = $_SERVER['SVELTEKIT_METHOD'] ?? 'load';
-    header('Content-Type: application/json');
-    $result = call_user_func($method, $event);
-    echo json_encode($result);
-}
+const phpBackendMain = `
+\\Basuke\\SvelteKit\\Backend::main(__NAMESPACE__);
 `;
 
 export default plugin;

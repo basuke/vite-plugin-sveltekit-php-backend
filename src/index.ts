@@ -161,8 +161,8 @@ const sharedClientJS = ({ address, debug, root }): string => `
   
       try {
         const response = await client.get(backendUrl, fcgiParams);
-        forwardCookies(response, event);
         console.log(response);
+        forwardCookies(response, event);
         resolve(response.json());
       } catch (e) {
         reject(e);
@@ -179,6 +179,7 @@ const sharedClientJS = ({ address, debug, root }): string => `
 
       try {
         const response = await client.get(backendUrl, fcgiParams);
+        console.log(response);
         forwardCookies(response, event);
 
         const res = new Response(response.body, {

@@ -6,7 +6,10 @@
   "autoload": {
     "psr-4": {
       "Basuke\\SvelteKit\\": "src/php/"
-    }
+    },
+    "files": [
+      "src/php/functions.php"
+    ]
   },
   "authors": [
     {

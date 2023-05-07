@@ -2,12 +2,14 @@
 
 namespace Basuke\SvelteKit;
 
-use function Uitls\fail;
-
 class Backend {
     public static function main(string $namespace = '\\') {
-        $backend = new Backend($namespace);
-        $backend->run();
+        static $run = false;
+        if (!$run) {
+            $run = true;
+            $backend = new Backend($namespace);
+            $backend->run();
+        }
     }
 
     private string $namespace;
@@ -37,11 +39,15 @@ class Backend {
     public function get() {
         $method = $_SERVER['SVELTEKIT_METHOD'] ?? 'load';
         if (is_callable($method)) {
-            $event = PageServerEvent::get();
-            $result = call_user_func($method, $event);
+            if ($method === 'load') {
+                $event = PageServerEvent::get();
+                $result = call_user_func($method, $event);
 
-            self::contentTypeIsJson();
-            echo json_encode($result);
+                json($result);
+            } else {
+                $event = PageServerEvent::get();
+                call_user_func($method, $event);
+            }
         } else {
             fail(500, ['error' => "Function '{$method}' is not defiened"]);
         }
@@ -63,12 +69,6 @@ class Backend {
     }
 
     public function options() {
-        self::contentTypeIsJson();
-
-        echo json_encode($this->environment);
-    }
-
-    public static function contentTypeIsJson() {
-        header("Content-type: application/json");
+        json($this->environment);
     }
 }

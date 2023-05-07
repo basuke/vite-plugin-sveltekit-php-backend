@@ -1,6 +1,11 @@
 <?php
 
-function GET($event) {
+require $_SERVER['DOCUMENT_ROOT'] . "/vendor/autoload.php";
+
+use Basuke\SvelteKit\PageServerEvent;
+use function Basuke\SvelteKit\json;
+
+function GET(PageServerEvent $event) {
     $fruite = $event->params['fruite'];
 
     switch ($fruite) {
@@ -15,8 +20,8 @@ function GET($event) {
             break;
     }
 
-    return [
+    json([
         'fruite' => $fruite,
         'emoji' => $emoji,
-    ];
+    ]);
 }

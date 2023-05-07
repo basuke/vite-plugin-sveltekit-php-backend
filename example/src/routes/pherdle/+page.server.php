@@ -3,7 +3,7 @@
 require $_SERVER['DOCUMENT_ROOT'] . "/vendor/autoload.php";
 
 use App\Game;
-use function Basuke\SvelteKit\Utils\fail;
+use function Basuke\SvelteKit\fail;
 
 function load() {
 	$game = new Game($_COOKIE['sverdle'] ?? null);

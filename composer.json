@@ -1,0 +1,18 @@
+{
+  "name": "basuke/sveltekit-php-backend",
+  "description": "SvelteKit PHP Backend",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Basuke\\SvelteKit\\": "src/php/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Basuke Suzuki",
+      "email": "basuke@mac.com"
+    }
+  ],
+  "require": {}
+}

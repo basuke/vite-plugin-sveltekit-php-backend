@@ -21,39 +21,41 @@ class Backend {
     }
 
     public function run() {
-        switch ($_SERVER['REQUEST_METHOD']) {
-            case 'GET':
-                $this->get();
-                break;
-            case 'POST':
-                $this->post();
-                break;
-            case 'OPTIONS':
-                $this->options();
-                break;
-            default:
-                fail(405, ['message' => 'Method Not Allowed']);
-        };
-    }
-
-    public function get() {
-        $method = $_SERVER['SVELTEKIT_METHOD'] ?? 'load';
-        if (is_callable($method)) {
-            if ($method === 'load') {
-                $event = PageServerEvent::get();
-                $result = call_user_func($method, $event);
-
-                json($result);
-            } else {
-                $event = PageServerEvent::get();
-                call_user_func($method, $event);
-            }
+        if (!empty($_SERVER['SVELTEKIT_METHOD'])) {
+            $this->endpoint($_SERVER['SVELTEKIT_METHOD']);
+        } else if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            $this->load();
+        } else if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->action();
+        } else if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+            $this->options();
         } else {
-            fail(500, ['error' => "Function '{$method}' is not defiened"]);
+            fail(500, ['error' => "Invalid calling convention"]);
         }
     }
 
-    public function post() {
+    public function load() {
+        $method = 'load';
+        if (is_callable($method)) {
+            $event = PageServerEvent::get();
+            $result = call_user_func($method, $event);
+
+            json($result);
+        } else {
+            fail(500, ['error' => "Function '{$method}' is not defiened or callable"]);
+        }
+    }
+
+    public function endpoint(string $method) {
+        if (is_callable($method)) {
+            $event = PageServerEvent::get();
+            call_user_func($method, $event);
+        } else {
+            fail(500, ['error' => "Function '{$method}' is not defiened or callable"]);
+        }
+    }
+
+    public function action() {
         $action = $_SERVER['SVELTEKIT_ACTION'] ?? 'default';
         global $actions;
         if (isset($actions[$action])) {

@@ -90,10 +90,11 @@ export async function plugin(
 
         const backendUrl = "http://localhost/" + relativePath;
         const response = await client.options(backendUrl, {});
-        console.log(response.json());
+        const config = response.json();
 
         if (id.endsWith("+server.php")) {
-          code = invokePhpEndpointJS(relativePath, "GET");
+          const methods = ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"];
+          code = invokePhpEndpointJS(relativePath, methods);
         } else {
           code =
             invokePhpLoadJS(relativePath) +
@@ -226,13 +227,19 @@ const invokePhpLoadJS = (phpPath: string) => `
   });
 `;
 
-const invokePhpEndpointJS = (phpPath: string, method: string) => `
+const invokePhpEndpointJS = (phpPath: string, methods: string[]) =>
+  `
   import { invokePhpEndpoint } from "${sharedClientVirtualModule}";
-
+` +
+  methods
+    .map(
+      (method) => `
   export async function ${method}(event) {
     return await invokePhpEndpoint(${Q(phpPath)}, ${Q(method)}, event);
   }
-`;
+`
+    )
+    .join("\n");
 //
 const definePhpActionsJS = (phpPath: string, actions: string[]) =>
   `

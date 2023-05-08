@@ -7,12 +7,25 @@ import { createClient } from 'fastcgi-kit';
 const name = 'vite-plugin-sveltekit-php-backend';
 const sharedClientVirtualModule = `virtual:${name}/shared-client`;
 const sharedClientResolvedModuleId = '\0' + sharedClientVirtualModule;
-
 const runtimeCode = fs.readFileSync(path.join(__dirname, 'runtime.js'), 'utf8');
+
+const verbose = {
+    showCodeStructure: false,
+    showGeneratedJSCode: false,
+};
 
 interface PHPBackendOptions {
     address?: string;
     debug?: boolean;
+}
+
+type ParameterSpec = [string, string]; // [type, name]
+type FunctionSpec = ParameterSpec[];
+
+interface CodeStructure {
+    load: FunctionSpec | null;
+    endpoints: Record<string, FunctionSpec>;
+    actions: Record<string, FunctionSpec>;
 }
 
 function posixify(str: string): string {
@@ -35,10 +48,10 @@ export async function plugin(
 ): Promise<Plugin[]> {
     const address = options.address ?? 'localhost:9000';
     const debug = options.debug ?? false;
-    let root;
+    let root: string;
     let building = false;
-    let phpDir;
-    let sharedCode;
+    let phpDir: string;
+    let sharedCode: string;
 
     const plugin: Plugin = {
         name,
@@ -87,36 +100,24 @@ export async function plugin(
 
                 const relativePath = path.relative(root, phpPath);
 
-                const client = createClient({
+                const structure = await analyzeCodeStructure(
                     address,
-                    debug,
-                    params: {
-                        DOCUMENT_ROOT: root,
-                    },
-                });
-
-                const backendUrl = 'http://localhost/' + relativePath;
-                const response = await client.options(backendUrl, {});
-                const config = response.json();
+                    root,
+                    relativePath
+                );
+                if (verbose.showCodeStructure) {
+                    console.log(structure);
+                }
 
                 if (id.endsWith('+server.php')) {
-                    const methods = [
-                        'GET',
-                        'POST',
-                        'PUT',
-                        'DELETE',
-                        'PATCH',
-                        'OPTIONS',
-                    ];
-                    code = invokePhpEndpointJS(relativePath, methods);
+                    code = invokePhpEndpointJS(relativePath, structure);
                 } else {
                     code =
-                        invokePhpLoadJS(relativePath) +
-                        definePhpActionsJS(relativePath, [
-                            'update',
-                            'enter',
-                            'restart',
-                        ]);
+                        invokePhpLoadJS(relativePath, structure) +
+                        definePhpActionsJS(relativePath, structure);
+                }
+                if (verbose.showGeneratedJSCode) {
+                    code.split('\n').forEach((line) => console.log(line));
                 }
                 return { code };
             }
@@ -126,40 +127,127 @@ export async function plugin(
     return [plugin];
 }
 
-interface PHPStructure {}
+async function analyzeCodeStructure(
+    address: string,
+    root: string,
+    phpPath: string
+): Promise<CodeStructure> {
+    const client = createClient({
+        address,
+        params: {
+            DOCUMENT_ROOT: root,
+        },
+    });
 
-const invokePhpLoadJS = (phpPath: string) => `
-  import { invokePhpLoad } from "${sharedClientVirtualModule}";
+    const backendUrl = 'http://localhost/' + phpPath;
+    const response = await client.options(backendUrl, {});
+    const config = response.json();
 
-  export const load = (async (event) => {
+    const endpoints: Record<string, FunctionSpec> = {};
+    const actions: Record<string, FunctionSpec> = {};
+    let load: FunctionSpec | null = null;
+
+    const filterParam = (arg): ParameterSpec | null => {
+        if (Array.isArray(arg) && arg.length === 2) {
+            const [type, name] = arg;
+            return [type, name];
+        } else {
+            return null;
+        }
+    };
+
+    const filterFunc = (arg): FunctionSpec | null => {
+        if (Array.isArray(arg)) {
+            return arg.map(filterParam).filter((x) => x !== null);
+        } else {
+            return null;
+        }
+    };
+
+    if (typeof config === 'object') {
+        if (config.load) {
+            load = filterFunc(config.load);
+        }
+        if (config.endpoints && typeof config.endpoints === 'object') {
+            for (const method in config.endpoints) {
+                const spec = filterFunc(config.endpoints[method]);
+                if (spec) {
+                    endpoints[method] = spec;
+                }
+            }
+        }
+        if (config.actions && typeof config.actions === 'object') {
+            for (const action in config.actions) {
+                const spec = filterFunc(config.actions[action]);
+                if (spec) {
+                    actions[action] = spec;
+                }
+            }
+        }
+    }
+
+    return {
+        load,
+        endpoints,
+        actions,
+    };
+}
+
+const invokePhpLoadJS = (phpPath: string, structure: CodeStructure) => {
+    if (!structure.load) {
+        return '';
+    }
+
+    return `
+import { invokePhpLoad } from "${sharedClientVirtualModule}";
+
+export const load = (async (event) => {
     return await invokePhpLoad(${Q(phpPath)}, event);
-  });
+});
 `;
+};
 
-const invokePhpEndpointJS = (phpPath: string, methods: string[]) =>
-    `
-  import { invokePhpEndpoint } from "${sharedClientVirtualModule}";
+const invokePhpEndpointJS = (phpPath: string, structure: CodeStructure) => {
+    const methods = Object.keys(structure.endpoints);
+    if (methods.length === 0) {
+        return '';
+    }
+
+    return (
+        `
+import { invokePhpEndpoint } from "${sharedClientVirtualModule}";
 ` +
-    methods
-        .map(
-            (method) => `
-  export async function ${method}(event) {
+        methods
+            .map(
+                (method) => `
+export async function ${method}(event) {
     return await invokePhpEndpoint(${Q(phpPath)}, ${Q(method)}, event);
-  }
+}
 `
-        )
-        .join('\n');
-//
-const definePhpActionsJS = (phpPath: string, actions: string[]) =>
-    `import { invokePhpActions } from "${sharedClientVirtualModule}";
+            )
+            .join('\n')
+    );
+};
 
-  export const actions = {` +
-    // prettier-ignore
-    actions.map((action) => `
-    ${Q(action)}: async (event) => invokePhpActions(${Q(phpPath)}, ${Q(action)}, event)`).join(",") +
-    `
-  };
-`;
+const definePhpActionsJS = (phpPath: string, structure: CodeStructure) => {
+    const actions = Object.keys(structure.actions);
+    if (actions.length === 0) {
+        return '';
+    }
+
+    return (
+        `
+import { invokePhpActions } from "${sharedClientVirtualModule}";
+
+export const actions = {` +
+        // prettier-ignore
+        actions.map((action) => `
+    ${Q(action)}: async (event) => invokePhpActions(${Q(phpPath)}, ${Q(action)}, event)`).join(",\n") +
+        `
+};
+`
+    );
+};
 
 const phpBackendMain = `<?php
 require $_SERVER['DOCUMENT_ROOT'] . "/vendor/autoload.php";

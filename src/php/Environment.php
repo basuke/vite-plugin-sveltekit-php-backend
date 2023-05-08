@@ -4,25 +4,22 @@ namespace Basuke\SvelteKit;
 
 class Environment {
     public ?array $load;
-    public ?array $GET;
-    public ?array $POST;
-    public ?array $PATCH;
-    public ?array $PUT;
-    public ?array $DELETE;
-    public ?array $OPTIONS;
-    public array $actions;
+    public array $actions = [];
+    public array $endpoints = [];
+
+    const Methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'];
 
     public function __construct() {
         $this->load = self::functionInfo('load');
-        $this->GET = self::functionInfo('GET');
-        $this->POST = self::functionInfo('POST');
-        $this->PATCH = self::functionInfo('PATCH');
-        $this->PUT = self::functionInfo('PUT');
-        $this->DELETE = self::functionInfo('DELETE');
-        $this->OPTIONS = self::functionInfo('OPTIONS');
+
+        foreach (self::Methods as $method) {
+            $def = self::functionInfo($method);
+            if ($def) {
+                $this->endpoints[$method] = $def;
+            }
+        }
 
         global $actions;
-        $this->actions = [];
         if (is_array($actions)) {
             foreach ($actions as $action => $callable) {
                 $def = self::functionInfo($callable);

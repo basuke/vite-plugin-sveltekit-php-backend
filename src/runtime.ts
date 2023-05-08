@@ -53,7 +53,7 @@ export const invokePhpLoad = async (path, event) => {
 
         try {
             const response = await client.get(backendUrl, fcgiParams);
-            console.log(response);
+            // console.log(response);
             forwardCookies(response, event);
             resolve(response.json());
         } catch (e) {
@@ -71,7 +71,7 @@ export const invokePhpEndpoint = async (path, method, event) => {
 
         try {
             const response = await client.get(backendUrl, fcgiParams);
-            console.log(response);
+            // console.log(response);
             forwardCookies(response, event);
 
             const res = new Response(response.body, {

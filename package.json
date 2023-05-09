@@ -1,23 +1,25 @@
 {
-    "name": "@basuke/sveltekit-php-backend",
+    "name": "vite-plugin-sveltekit-php-backend",
     "version": "0.1.0",
-    "description": "PHP Backend vite Plugin for SvelteKit",
+    "description": "PHP Backend Vite Plugin for SvelteKit",
     "main": "dist/index.js",
     "typings": "dist/index.d.ts",
     "type": "module",
+    "files": [
+        "/dist"
+    ],
     "scripts": {
         "build": "tsc",
         "watch": "tsc -w"
     },
     "author": "Basuke Suzuki",
     "license": "MIT",
-    "dependencies": {
-        "fastcgi-kit": "^0.1.0"
-    },
+    "dependencies": {},
     "devDependencies": {
         "@sveltejs/kit": "^1.16.2",
         "@types/node": "^18.16.3",
         "typescript": "^5.0.3",
-        "vite": "^4.2.1"
+        "vite": "^4.2.1",
+        "fastcgi-kit": "^0.10.0"
     }
 }

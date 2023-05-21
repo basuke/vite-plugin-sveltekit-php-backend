@@ -225,10 +225,10 @@ esm-env@^1.0.0:
   resolved "https://registry.yarnpkg.com/esm-env/-/esm-env-1.0.0.tgz#b124b40b180711690a4cb9b00d16573391950413"
   integrity sha512-Cf6VksWPsTuW01vU9Mk/3vRue91Zevka5SjyNf3nEpokFRuqt/KjUQoGAwq9qMmhpLTHmXzSIrFRw8zxWzmFBA==
 
-fastcgi-kit@^0.10.0:
-  version "0.10.0"
-  resolved "https://registry.yarnpkg.com/fastcgi-kit/-/fastcgi-kit-0.10.0.tgz#fa52b6b96c49f8dd0c4c14c02ebdd8a57104c85d"
-  integrity sha512-N607xHXRZUJIO5jgSGc2sJOZgnl9ehyisBSlsY97YAuVKp3kstLtYgVnuqteWCOyTmZN5B0pW7fZ7HvrQAA/sw==
+fastcgi-kit@^0.12.0:
+  version "0.12.0"
+  resolved "https://registry.yarnpkg.com/fastcgi-kit/-/fastcgi-kit-0.12.0.tgz#a1bd7abc6062c89b5f274497702412717a7ab73e"
+  integrity sha512-jD/TISqr9rgl/BDsyPy6YKbaaOcwZL0cjc2qsXdfoY0N6etjMWm2zL0BUTtmdWfeC+r2Ja7H1yUI5eRvxz+m7g==
 
 fsevents@~2.3.2:
   version "2.3.2"

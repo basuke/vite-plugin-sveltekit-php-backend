@@ -48,7 +48,7 @@ function forwardCookies(response, { cookies }) {
 
 export const invokePhpLoad = async (path, event) => {
     return new Promise(async (resolve, reject) => {
-        const backendUrl = 'http://localhost/' + path;
+        const backendUrl = new URL('http://localhost/' + path);
         const fcgiParams = createFCGIParams(event);
 
         try {
@@ -64,7 +64,7 @@ export const invokePhpLoad = async (path, event) => {
 
 export const invokePhpEndpoint = async (path, method, event) => {
     return new Promise(async (resolve, reject) => {
-        const backendUrl = 'http://localhost/' + path;
+        const backendUrl = new URL('http://localhost/' + path);
         const fcgiParams = createFCGIParams(event);
         fcgiParams['REQUEST_METHOD'] = method;
         fcgiParams['SVELTEKIT_METHOD'] = method;
@@ -90,7 +90,7 @@ export async function invokePhpActions(path, action, event) {
     const body = new URLSearchParams(await request.formData()).toString();
 
     return new Promise(async (resolve, reject) => {
-        const backendUrl = 'http://localhost/' + path;
+        const backendUrl = new URL('http://localhost/' + path);
         const fcgiParams = createFCGIParams(event);
         fcgiParams['SVELTEKIT_ACTION'] = action;
 

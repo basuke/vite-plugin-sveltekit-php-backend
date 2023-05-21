@@ -1,8 +1,15 @@
 {
     "name": "basuke/sveltekit-php-backend",
-    "description": "SvelteKit PHP Backend",
+    "description": "Package to support SvelteKit PHP Backend",
     "type": "library",
     "license": "MIT",
+    "keywords": [
+        "Svelte",
+        "SvelteKit",
+        "Vite",
+        "Backend"
+    ],
+    "homepage": "https://github.com/basuke/vite-plugin-sveltekit-php-backend",
     "autoload": {
         "psr-4": {
             "Basuke\\SvelteKit\\": "src/php/"
@@ -17,5 +24,7 @@
             "email": "basuke@mac.com"
         }
     ],
-    "require": {}
+    "require": {
+        "php": ">=8.0.0"
+    }
 }

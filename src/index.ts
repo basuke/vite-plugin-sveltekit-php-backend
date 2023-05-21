@@ -139,7 +139,7 @@ async function analyzeCodeStructure(
         },
     });
 
-    const backendUrl = 'http://localhost/' + phpPath;
+    const backendUrl = new URL('http://localhost/' + phpPath);
     const response = await client.options(backendUrl, {});
     const config = response.json();
 

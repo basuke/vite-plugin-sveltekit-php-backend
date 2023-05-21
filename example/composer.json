@@ -18,7 +18,7 @@
         }
     ],
     "require": {
-        "basuke/sveltekit-php-backend": "dev-main",
+        "basuke/sveltekit-php-backend": "^1.0",
         "alrik11es/cowsayphp": "^1.2",
         "mdwheele/fortune": "dev-master"
     }

@@ -8,8 +8,8 @@ You can have PHP logic directly in SvelteKit route directory like this: `+page.s
 
 ```PHP
 <?php
-function load(array $event) {
-    $name = ($event['params']['name'] ?? 'unknownn');
+function load($event) {
+    $name = ($event->params['name'] ?? 'unknownn');
     return [
         'message' => "Hello " . $name,
     ];
@@ -20,20 +20,20 @@ You can also use PHP to write `form actions` or `endpoint`.
 
 Because SvelteKit talks Web standards, communication between SvelteKit and backend PHP server is pretty straight forward using HTTP semantics.
 
-- This plugin allows you to use SvelteKit the frontend of PHP backend.
-- Not like the one which uses SvelteKit as an assets manager.
-- No need to have a router in PHP side. SvelteKit is the router.
-- No need to have Nginx as a front end of PHP-fpm. Plugin communicate directly with PHP-fpm.
-- Of course, it's Composer compatible so that you can use any composer PHP packages including your own application logic.
-- It is obvious but you cannot create `+page.php` because there's no PHP runtime in client environment.
+-   This plugin allows you to use SvelteKit the frontend of PHP backend.
+-   Not like the one which uses SvelteKit as an assets manager.
+-   No need to have a router in PHP side. SvelteKit is the router.
+-   No need to have Nginx as a front end of PHP-fpm. Plugin communicate directly with PHP-fpm.
+-   Of course, it's Composer compatible so that you can use any composer PHP packages including your own application logic.
+-   It is obvious but you cannot create `+page.php` because there's no PHP runtime in client environment.
 
 ## How to run demo
 
 ### Prerequirements:
 
-- PHP with PHP fpm running
-- composer for PHP packages
-- Node.js
+-   PHP with PHP fpm running
+-   composer for PHP packages
+-   Node.js
 
 ### Steps
 
@@ -69,9 +69,9 @@ But not for SvelteKit. It's a complete web application framework and that's over
 
 With this plugin, you can connect your business logics written in PHP directly to SvelteKit's page logic. You can replace following code from PHP to SvelteKit:
 
-- router
-- controller
-- page rendering
+-   router
+-   controller
+-   page rendering
 
 ## No nginx required any more
 

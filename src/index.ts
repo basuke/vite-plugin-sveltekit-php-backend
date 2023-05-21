@@ -2,11 +2,13 @@ import type { Plugin } from 'vite';
 
 import path from 'node:path';
 import fs from 'node:fs';
+import url from 'node:url';
 import { createClient } from 'fastcgi-kit';
 
 const name = 'vite-plugin-sveltekit-php-backend';
 const sharedClientVirtualModule = `virtual:${name}/shared-client`;
 const sharedClientResolvedModuleId = '\0' + sharedClientVirtualModule;
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const runtimeCode = fs.readFileSync(path.join(__dirname, 'runtime.js'), 'utf8');
 
 const verbose = {

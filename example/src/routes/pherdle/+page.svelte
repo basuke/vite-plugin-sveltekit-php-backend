@@ -4,10 +4,10 @@
 
 	import { reduced_motion } from './reduced-motion';
 
-	/** @type {import('./$types').PageData} */
+	/** @type {{answers:string[], guesses:string[], answer: string}}} */
 	export let data;
 
-	/** @type {import('./$types').ActionData} */
+	/** @type {{badGuess:boolean}} */
 	export let form;
 
 	/** Whether or not the user has won */
@@ -104,7 +104,7 @@
 		};
 	}}
 >
-	<a class="how-to-play" href="/sverdle/how-to-play">How to play</a>
+	<a class="how-to-play" href="/pherdle/how-to-play">How to play</a>
 
 	<div class="grid" class:playing={!won} class:bad-guess={form?.badGuess}>
 		{#each Array(6) as _, row}

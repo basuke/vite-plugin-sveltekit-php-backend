@@ -1,5 +1,12 @@
 <script>
 
+/** @type {{
+ * name:string,
+ * emoji:string,
+ * previous?:string,
+ * encoded:string,
+ * server: Record<string, string>
+ * }}*/
 export let data;
 
 </script>

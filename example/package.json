@@ -16,6 +16,7 @@
         "@sveltejs/adapter-node": "^1.2.2",
         "@sveltejs/kit": "^1.16.2",
         "@types/cookie": "^0.5.1",
+        "cookie": "^0.5.0",
         "svelte": "^3.54.0",
         "svelte-check": "^3.0.1",
         "tslib": "^2.4.1",
@@ -23,8 +24,5 @@
         "vite": "^4.0.0"
     },
     "type": "module",
-    "dependencies": {
-        "cookie": "^0.5.0",
-        "fastcgi-kit": "^0.9.0"
-    }
+    "dependencies": {}
 }

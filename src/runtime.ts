@@ -66,11 +66,14 @@ export const invokePhpEndpoint = async (path, method, event) => {
     return new Promise(async (resolve, reject) => {
         const backendUrl = new URL('http://localhost/' + path);
         const fcgiParams = createFCGIParams(event);
-        fcgiParams['REQUEST_METHOD'] = method;
         fcgiParams['SVELTEKIT_METHOD'] = method;
 
         try {
-            const response = await client.get(backendUrl, fcgiParams);
+            const response = await client.request({
+                url: backendUrl,
+                method: method as string,
+                params: fcgiParams,
+            });
             // console.log(response);
             forwardCookies(response, event);
 

@@ -1,5 +1,5 @@
 import { sveltekit } from '@sveltejs/kit/vite';
-import phpBackend from '..';
+import phpBackend from 'vite-plugin-sveltekit-php-backend';
 import { defineConfig } from 'vite';
 
 export default defineConfig({

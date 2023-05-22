@@ -45,9 +45,7 @@ function Q(s: string): string {
 /**
  * Returns the PHP Backend for SvelteKit Vite plugin.
  */
-export async function plugin(
-    options: PHPBackendOptions = {}
-): Promise<Plugin[]> {
+export async function plugin(options: PHPBackendOptions = {}): Promise<Plugin> {
     const address = options.address ?? 'localhost:9000';
     const debug = options.debug ?? false;
     let root: string;
@@ -126,7 +124,7 @@ export async function plugin(
         },
         buildEnd() {},
     };
-    return [plugin];
+    return plugin;
 }
 
 async function analyzeCodeStructure(

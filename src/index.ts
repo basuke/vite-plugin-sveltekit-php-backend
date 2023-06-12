@@ -59,10 +59,7 @@ export async function plugin(options: PHPBackendOptions = {}): Promise<Plugin> {
         configResolved(config) {
             root = config.root;
             building = config.command === 'build';
-            phpDir = path.join(
-                building ? config.build.outDir : config.cacheDir,
-                'php'
-            );
+            phpDir = path.join(config.cacheDir, 'php');
             sharedCode = runtimeCode
                 .replace("'%ADDRESS%'", Q(address))
                 .replace("'%DOCUMENT_ROOT%'", Q(root));
